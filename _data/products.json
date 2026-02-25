@@ -3,6 +3,12 @@
     "name": "Golden Sweetness 50ml",
     "price": N5,000,
     "description": "We will add the description here.",
-    "image": "/images/candle1.jpg"
+     "image": "https://via.placeholder.com/400x400/8d6e63/ffffff?text=Vanilla+Candle"
+  },
+  {
+    "name": "Oud Royale 50ml",
+    "price": N,5,000,
+    "description": "Calming lavender",
+    "image": "https://via.placeholder.com/400x400/9575cd/ffffff?text=Lavender+Diffuser"
   }
 ]
