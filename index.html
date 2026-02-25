@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scent & Decor</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Decap CMS -->
+    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+</head>
+<body>
+
+    <header>
+        <div class="logo">Scent & Decor</div>
+        <button id="cart-btn" onclick="toggleCart()">Cart (<span id="cart-count">0</span>)</button>
+    </header>
+
+    <div class="hero">
+        <h1>Handmade Scents for Your Home</h1>
+        <p>Browse our collection of diffusers and candles.</p>
+    </div>
+
+    <main id="product-grid">
+        <!-- Products will load here automatically from CMS -->
+        <p>Loading products...</p>
+    </main>
+
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="toggleCart()">&times;</span>
+            <h2>Your Cart</h2>
+            <div id="cart-items"></div>
+            <div class="cart-total">Total: $<span id="cart-total">0</span></div>
+            
+            <div class="checkout-section">
+                <h3>How to Order</h3>
+                <p>We do not accept online payments. Please transfer the total amount to the account below and send proof of payment via WhatsApp.</p>
+                <div class="bank-details">
+                    <strong>Bank Name:</strong> Example Bank<br>
+                    <strong>Account Name:</strong> Friend's Business<br>
+                    <strong>Account No:</strong> 1234567890
+                </div>
+                <button class="checkout-btn" onclick="checkoutWhatsApp()">Confirm Order via WhatsApp</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Scent & Decor. <a href="/admin">Admin Login</a></p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
