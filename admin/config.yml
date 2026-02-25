@@ -4,6 +4,9 @@ backend:
   branch: main
   open_authoring: true
 
+# Optional: Add this to prevent caching issues
+publish_mode: editorial_workflow
+
 media_folder: "images"
 public_folder: "/images"
 
