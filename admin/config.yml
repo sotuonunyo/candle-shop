@@ -1,6 +1,8 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: sotuonunyo/candle-shop
   branch: main
+  open_authoring: true
 
 media_folder: "images"
 public_folder: "/images"
@@ -16,19 +18,3 @@ collections:
       - {label: "Price", name: "price", widget: "number"}
       - {label: "Description", name: "description", widget: "text"}
       - {label: "Image", name: "image", widget: "image"}
-      
-  - name: "settings"
-    label: "Site Settings"
-    files:
-      - file: "_data/products.json"
-        label: "Product List"
-        name: "product_list"
-        fields:
-          - label: "Products"
-            name: "products"
-            widget: "list"
-            fields:
-              - {label: "Product Name", name: "name", widget: "string"}
-              - {label: "Price", name: "price", widget: "number"}
-              - {label: "Description", name: "description", widget: "text"}
-              - {label: "Image", name: "image", widget: "image"}
