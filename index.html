@@ -3,27 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luxvira</title>
+    <title>Scent & Decor | Home</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Decap CMS -->
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 </head>
-<body>
+<body class="theme-default">
 
-    <header>
-        <div class="logo">Luxvira </div>
-        <button id="cart-btn" onclick="toggleCart()">Cart (<span id="cart-count">0</span>)</button>
-    </header>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">🕯️ Scent & Decor</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="products.html">Products</a>
+            <a href="contact.html">Contact</a>
+        </div>
+        <div class="cart-icon" onclick="toggleCart()">
+            🛒 <span id="cart-count">0</span>
+        </div>
+    </nav>
 
-    <div class="hero">
-        <h1>Handmade Scents for Your Home</h1>
-        <p>Browse our collection of diffusers and candles.</p>
-    </div>
+    <!-- Hero Slideshow -->
+    <section class="slideshow-container">
+        <div class="slideshow" id="slideshow">
+            <!-- Slides loaded via JS -->
+        </div>
+        <button class="slide-btn prev" onclick="changeSlide(-1)">❮</button>
+        <button class="slide-btn next" onclick="changeSlide(1)">❯</button>
+        <div class="slide-dots" id="slide-dots"></div>
+    </section>
 
-    <main id="product-grid">
-        <!-- Products will load here automatically from CMS -->
-        <p>Loading products...</p>
-    </main>
+    <!-- Mailing List Form -->
+    <section class="mailing-section">
+        <h2>Stay Updated</h2>
+        <p>Get notified about new products and exclusive offers</p>
+        <form id="mailing-form" onsubmit="submitMailing(event)">
+            <input type="text" id="mail-name" placeholder="Your Name" required>
+            <input type="email" id="mail-email" placeholder="Your Email" required>
+            <button type="submit">Subscribe</button>
+        </form>
+        <div id="mail-success" class="success-msg" style="display:none;">Thank you for subscribing! 🎉</div>
+    </section>
+
+    <!-- Hidden Admin Link -->
+    <footer>
+        <p>&copy; 2024 Scent & Decor</p>
+        <a href="admin/" class="admin-link" id="hidden-admin">⚙️</a>
+    </footer>
 
     <!-- Cart Modal -->
     <div id="cart-modal" class="modal">
@@ -32,25 +57,16 @@
             <h2>Your Cart</h2>
             <div id="cart-items"></div>
             <div class="cart-total">Total: $<span id="cart-total">0</span></div>
-            
             <div class="checkout-section">
-                <h3>How to Order</h3>
-                <p>We do not accept online payments. Please transfer the total amount to the account below and send proof of payment via WhatsApp.</p>
-                <div class="bank-details">
-                    <strong>Bank Name:</strong> Example Bank<br>
-                    <strong>Account Name:</strong> Friend's Business<br>
-                    <strong>Account No:</strong> 1234567890
+                <h3>Complete Your Order</h3>
+                <div class="bank-details" id="bank-details">
+                    <!-- Loaded from settings -->
                 </div>
-                <button class="checkout-btn" onclick="checkoutWhatsApp()">Confirm Order via WhatsApp</button>
+                <button class="checkout-btn" onclick="checkoutWhatsApp()">Order via WhatsApp</button>
             </div>
         </div>
     </div>
 
-    <footer>
-        <p>&copy; 2023 Scent & Decor. <a href="/admin">Admin Login</a></p>
-    </footer>
-
     <script src="script.js"></script>
 </body>
-
 </html>
