@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Luxvira</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .admin-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px; background: #8d6e63; color: white;
+    }
+    .admin-header button {
+      background: white; color: #8d6e63; border: none;
+      padding: 8px 20px; border-radius: 5px; cursor: pointer;
+    }
+    .admin-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .admin-section {
+      background: white; border-radius: 10px; padding: 20px;
+      margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .admin-section h3 { margin-bottom: 15px; color: #8d6e63; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+    
+    /* Product Form */
+    .product-form { display: grid; gap: 15px; }
+    .product-form input, .product-form textarea, .product-form select {
+      width: 100%; padding: 10px; border: 1px solid #ddd;
+      border-radius: 5px; font-size: 1rem;
+    }
+    .product-form button {
+      background: #8d6e63; color: white; border: none;
+      padding: 12px; border-radius: 5px; cursor: pointer; font-size: 1rem;
+    }
+    .product-form button:hover { background: #6d4c41; }
+    
+    /* Product List */
+    .product-list { display: grid; gap: 15px; }
+    .product-item {
+      display: flex; gap: 15px; padding: 15px;
+      border: 1px solid #eee; border-radius: 8px; align-items: center;
+    }
+    .product-item img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; }
+    .product-item-info { flex: 1; }
+    .product-item-actions button {
+      margin-right: 10px; padding: 5px 15px;
+      border: none; border-radius: 3px; cursor: pointer;
+    }
+    .edit-btn { background: #2196F3; color: white; }
+    .delete-btn { background: #f44336; color: white; }
+    
+    /* Settings Form */
+    .settings-form { display: grid; gap: 15px; max-width: 500px; }
+    .settings-form input, .settings-form textarea {
+      width: 100%; padding: 10px; border: 1px solid #ddd;
+      border-radius: 5px; font-size: 1rem;
+    }
+    
+    /* Mailing List */
+    .mailing-list { max-height: 400px; overflow-y: auto; }
+    .mailing-item {
+      padding: 10px; border-bottom: 1px solid #eee;
+      display: flex; justify-content: space-between;
+    }
+    
+    /* Loading & Messages */
+    .loading { text-align: center; padding: 20px; color: #666; }
+    .success-msg { color: green; margin-top: 10px; display: none; }
+    .error-msg { color: red; margin-top: 10px; display: none; }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .product-item { flex-direction: column; text-align: center; }
+      .product-item-actions { margin-top: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-header">
+    <h2>🕯️ Luxvira Admin</h2>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <div class="admin-container">
+    
+    <!-- Add/Edit Product Section -->
+    <div class="admin-section">
+      <h3 id="form-title">➕ Add New Product</h3>
+      <form class="product-form" id="product-form" onsubmit="saveProduct(event)">
+        <input type="hidden" id="edit-index">
+        <input type="text" id="prod-name" placeholder="Product Name *" required>
+        <input type="number" id="prod-price" placeholder="Price ($) *" required step="0.01" min="0">
+        <textarea id="prod-desc" placeholder="Description *" rows="3" required></textarea>
+        <textarea id="prod-ingredients" placeholder="Ingredients (optional)" rows="2"></textarea>
+        <input type="text" id="prod-image" placeholder="Image URL or upload below">
+        <input type="file" id="prod-image-upload" accept="image/*" onchange="previewImage(event)">
+        <img id="image-preview" style="max-width: 200px; display: none; margin-top: 10px; border-radius: 5px;">
+        <label style="display: flex; align-items: center; gap: 10px;">
+          <input type="checkbox" id="prod-slideshow"> Show in Homepage Slideshow
+        </label>
+        <button type="submit" id="save-btn">💾 Save Product</button>
+        <button type="button" onclick="cancelEdit()" style="background: #999; margin-left: 10px;">Cancel</button>
+        <p class="success-msg" id="form-success">Product saved! ✅</p>
+        <p class="error-msg" id="form-error">Error saving product ❌</p>
+      </form>
+    </div>
+
+    <!-- Products List Section -->
+    <div class="admin-section">
+      <h3>📦 All Products</h3>
+      <div class="product-list" id="product-list">
+        <p class="loading">Loading products...</p>
+      </div>
+    </div>
+
+    <!-- Business Settings Section -->
+    <div class="admin-section">
+      <h3>⚙️ Business Settings</h3>
+      <form class="settings-form" onsubmit="saveSettings(event)">
+        <input type="text" id="set-whatsapp" placeholder="WhatsApp Number (with country code)" required>
+        <input type="text" id="set-bank" placeholder="Bank Name">
+        <input type="text" id="set-account-num" placeholder="Account Number">
+        <input type="text" id="set-account-name" placeholder="Account Name">
+        <textarea id="set-address" placeholder="Business Address" rows="2"></textarea>
+        <input type="text" id="set-phone" placeholder="Phone Number">
+        <input type="email" id="set-email" placeholder="Email Address">
+        <input type="text" id="set-hours" placeholder="Business Hours (e.g., Mon-Sat: 9AM-6PM)">
+        <select id="set-theme">
+          <option value="default">Theme: Default (Brown)</option>
+          <option value="lavender">Theme: Lavender</option>
+          <option value="sage">Theme: Sage Green</option>
+          <option value="ocean">Theme: Ocean Blue</option>
+        </select>
+        <button type="submit">💾 Save Settings</button>
+        <p class="success-msg" id="settings-success">Settings saved! ✅</p>
+      </form>
+    </div>
+
+    <!-- Mailing List Section -->
+    <div class="admin-section">
+      <h3>📧 Mailing List Subscribers</h3>
+      <div class="mailing-list" id="mailing-list">
+        <p class="loading">Loading subscribers...</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
