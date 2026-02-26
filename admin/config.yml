@@ -4,8 +4,11 @@ backend:
   branch: main
   open_authoring: true
 
+# ⚠️ CRITICAL FOR GITHUB PAGES:
+base_url: https://sotuonunyo.github.io/candle-shop/
+
 media_folder: "images"
-public_folder: "/images"
+public_folder: "/candle-shop/images"
 
 collections:
   - name: "products"
