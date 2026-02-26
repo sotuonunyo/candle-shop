@@ -264,15 +264,11 @@ async function submitMailing(event) {
     const name = document.getElementById('mail-name').value;
     const email = document.getElementById('mail-email').value;
     
-    // Add to mailing list (this will need admin to view)
     try {
-        // In production, this would POST to an API
-        // For now, we'll store locally and admin can access via CMS
-        const mailingList = await fetch('/_data/mailing-list.json').then(r => r.json()).catch(() => []);
+        const res = await fetch(`${repoPath}/_data/mailing-list.json`);
+        const mailingList = await res.json().catch(() => []);
         mailingList.push({ name, email, date: new Date().toISOString() });
         
-        // Note: This won't actually save without backend
-        // Admin will need to collect via form submissions
         document.getElementById('mail-success').style.display = 'block';
         document.getElementById('mailing-form').reset();
         setTimeout(() => {
@@ -296,4 +292,5 @@ if(adminLink) {
         e.preventDefault();
     });
 }
+
 
