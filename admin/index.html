@@ -1,14 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin - Luxvira Products Enterprise</title>
-  <!-- Decap CMS Script - NO SPACES -->
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - Luxvira</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .login-container {
+      max-width: 400px; margin: 100px auto; padding: 30px;
+      background: white; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .login-container h2 { margin-bottom: 20px; color: #8d6e63; }
+    .login-container input {
+      width: 100%; padding: 12px; margin: 10px 0;
+      border: 1px solid #ddd; border-radius: 5px; font-size: 1rem;
+    }
+    .login-container button {
+      width: 100%; padding: 12px; background: #8d6e63;
+      color: white; border: none; border-radius: 5px;
+      font-size: 1rem; cursor: pointer; margin-top: 10px;
+    }
+    .login-container button:hover { background: #6d4c41; }
+    .error-msg { color: red; margin-top: 10px; display: none; }
+  </style>
 </head>
 <body>
-  <!-- Decap CMS mounts here automatically -->
-  Decap CMS mounts here automatically
+  <div class="login-container">
+    <h2>🔐 Admin Login</h2>
+    <input type="password" id="admin-password" placeholder="Enter admin password">
+    <button onclick="login()">Login</button>
+    <p class="error-msg" id="error-msg">Incorrect password</p>
+  </div>
+
+  <script>
+    // ⚠️ CHANGE THIS PASSWORD to something secure!
+    const ADMIN_PASSWORD = "luxvira2024";
+
+    function login() {
+      const input = document.getElementById('admin-password').value;
+      const errorMsg = document.getElementById('error-msg');
+      
+      if(input === ADMIN_PASSWORD) {
+        // Save login state
+        localStorage.setItem('adminLoggedIn', 'true');
+        // Redirect to dashboard
+        window.location.href = 'dashboard.html';
+      } else {
+        errorMsg.style.display = 'block';
+      }
+    }
+
+    // Check if already logged in
+    if(localStorage.getItem('adminLoggedIn') === 'true') {
+      window.location.href = 'dashboard.html';
+    }
+
+    // Allow Enter key to submit
+    document.getElementById('admin-password').addEventListener('keypress', function(e) {
+      if(e.key === 'Enter') login();
+    });
+  </script>
 </body>
 </html>
