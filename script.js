@@ -1,60 +1,159 @@
 let cart = [];
 let products = [];
+let slideshowProducts = [];
+let settings = {};
 
-// 1. Fetch Products from CMS Data
-async function loadProducts() {
+// Load all data on page load
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadSettings();
+    await loadProducts();
+    await loadSlideshow();
+    updateCartUI();
+    updateBankDetails();
+    updateContactInfo();
+});
+
+// Load Settings (WhatsApp, Bank Info, Theme)
+async function loadSettings() {
     try {
-        // In a real Decap CMS setup, this fetches from the git branch
-        // For simplicity in this demo, we will look for a generated 'products.json' 
-        // OR we can fetch the markdown files directly if configured. 
-        // To keep this no-backend simple, we will use a specific Decap CMS data file approach.
-        
-        const response = await fetch('/admin/config.yml'); 
-        // Note: In production with Decap, products are usually stored in _data/products.json 
-        // or as markdown files. For this specific code to work without a build step, 
-        // we will assume you create a 'products.json' in the root via the CMS.
-        
-        // SIMPLIFIED FOR YOU: 
-        // We will fetch a products.json file that the CMS will update.
-        const prodResponse = await fetch('/products.json');
-        if(!prodResponse.ok) throw new Error("No products yet");
-        products = await prodResponse.json();
-        renderProducts();
-    } catch (error) {
-        document.getElementById('product-grid').innerHTML = "<p>Store is currently updating. Check back soon!</p>";
-        console.log("Waiting for CMS to publish products.json");
+        const res = await fetch('/_data/settings.json');
+        settings = await res.json();
+        // Apply theme
+        if(settings.theme) {
+            document.body.className = `theme-${settings.theme}`;
+        }
+    } catch(e) {
+        console.log('Settings not loaded yet');
+        settings = { whatsapp: '1234567890', theme: 'default' };
     }
 }
 
+// Load Products
+async function loadProducts() {
+    try {
+        const res = await fetch('/_data/products.json');
+        products = await res.json();
+        renderProducts();
+    } catch(e) {
+        console.log('No products yet');
+        products = [];
+    }
+}
+
+// Load Slideshow
+async function loadSlideshow() {
+    try {
+        const res = await fetch('/_data/slideshow.json');
+        slideshowProducts = await res.json();
+        renderSlideshow();
+    } catch(e) {
+        console.log('No slideshow yet');
+        slideshowProducts = [];
+    }
+}
+
+// Render Products Grid
 function renderProducts() {
-    const grid = document.getElementById('product-grid');
+    const grid = document.getElementById('products-grid');
+    if(!grid) return;
+    
     grid.innerHTML = '';
     products.forEach(product => {
         grid.innerHTML += `
             <div class="product-card">
                 <img src="${product.image}" alt="${product.name}">
+                <button class="add-to-cart-btn" onclick="addToCart('${product.name}', ${product.price})">
+                    Add to Cart
+                </button>
                 <div class="product-info">
                     <h3>${product.name}</h3>
-                    <p>${product.description}</p>
                     <div class="product-price">$${product.price}</div>
-                    <button class="add-btn" onclick="addToCart('${product.name}', ${product.price})">Add to Cart</button>
+                    <div class="product-ingredients">${product.ingredients || 'Natural ingredients'}</div>
+                    <p>${product.description}</p>
                 </div>
             </div>
         `;
     });
 }
 
+// Render Slideshow
+let currentSlide = 0;
+let slideInterval;
+
+function renderSlideshow() {
+    const slideshow = document.getElementById('slideshow');
+    const dots = document.getElementById('slide-dots');
+    if(!slideshow) return;
+    
+    slideshow.innerHTML = '';
+    dots.innerHTML = '';
+    
+    slideshowProducts.forEach((prod, index) => {
+        slideshow.innerHTML += `
+            <div class="slide">
+                <img src="${prod.image}" alt="${prod.name}">
+                <div class="slide-info">
+                    <h2>${prod.name}</h2>
+                    <p>${prod.description}</p>
+                    <button class="checkout-btn" onclick="addToCart('${prod.name}', ${prod.price})">
+                        Add to Cart - $${prod.price}
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        dots.innerHTML += `<span class="dot ${index === 0 ? 'active' : ''}" onclick="goToSlide(${index})"></span>`;
+    });
+    
+    if(slideshowProducts.length > 0) {
+        startSlideShow();
+    }
+}
+
+function changeSlide(n) {
+    if(slideshowProducts.length === 0) return;
+    currentSlide += n;
+    if(currentSlide >= slideshowProducts.length) currentSlide = 0;
+    if(currentSlide < 0) currentSlide = slideshowProducts.length - 1;
+    updateSlideDisplay();
+}
+
+function goToSlide(n) {
+    currentSlide = n;
+    updateSlideDisplay();
+}
+
+function updateSlideDisplay() {
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.dot');
+    slides.forEach((slide, i) => {
+        slide.style.display = i === currentSlide ? 'flex' : 'none';
+    });
+    dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentSlide);
+    });
+}
+
+function startSlideShow() {
+    clearInterval(slideInterval);
+    slideInterval = setInterval(() => changeSlide(1), 5000);
+}
+
+// Cart Functions
 function addToCart(name, price) {
     cart.push({ name, price });
     updateCartUI();
+    alert(`${name} added to cart!`);
 }
 
 function updateCartUI() {
     document.getElementById('cart-count').innerText = cart.length;
     const cartItems = document.getElementById('cart-items');
+    if(!cartItems) return;
+    
     cartItems.innerHTML = '';
     let total = 0;
-    cart.forEach((item, index) => {
+    cart.forEach(item => {
         total += item.price;
         cartItems.innerHTML += `
             <div class="cart-item">
@@ -71,6 +170,29 @@ function toggleCart() {
     modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
 }
 
+function updateBankDetails() {
+    const bankDiv = document.getElementById('bank-details');
+    if(!bankDiv) return;
+    
+    bankDiv.innerHTML = `
+        <strong>Bank:</strong> ${settings.bankName || 'Example Bank'}<br>
+        <strong>Account:</strong> ${settings.accountNumber || '1234567890'}<br>
+        <strong>Name:</strong> ${settings.accountName || 'Business Name'}
+    `;
+}
+
+function updateContactInfo() {
+    const contactDiv = document.getElementById('contact-info');
+    if(!contactDiv) return;
+    
+    contactDiv.innerHTML = `
+        <p><strong>📍 Address:</strong> ${settings.address || '123 Main Street'}</p>
+        <p><strong>📞 Phone:</strong> ${settings.phone || '+1 234 567 890'}</p>
+        <p><strong>📧 Email:</strong> ${settings.email || 'info@scentdecor.com'}</p>
+        <p><strong>⏰ Hours:</strong> ${settings.hours || 'Mon-Sat: 9AM-6PM'}</p>
+    `;
+}
+
 function checkoutWhatsApp() {
     if(cart.length === 0) return alert("Cart is empty");
     
@@ -82,8 +204,45 @@ function checkoutWhatsApp() {
     });
     message += `%0ATotal: $${total}%0A%0AI will send payment proof shortly.`;
     
-    // Replace with your friend's WhatsApp number
-    window.open(`https://wa.me/1234567890?text=${message}`, '_blank');
+    window.open(`https://wa.me/${settings.whatsapp}?text=${message}`, '_blank');
 }
 
-loadProducts();
+// Mailing List
+async function submitMailing(event) {
+    event.preventDefault();
+    
+    const name = document.getElementById('mail-name').value;
+    const email = document.getElementById('mail-email').value;
+    
+    // Add to mailing list (this will need admin to view)
+    try {
+        // In production, this would POST to an API
+        // For now, we'll store locally and admin can access via CMS
+        const mailingList = await fetch('/_data/mailing-list.json').then(r => r.json()).catch(() => []);
+        mailingList.push({ name, email, date: new Date().toISOString() });
+        
+        // Note: This won't actually save without backend
+        // Admin will need to collect via form submissions
+        document.getElementById('mail-success').style.display = 'block';
+        document.getElementById('mailing-form').reset();
+        setTimeout(() => {
+            document.getElementById('mail-success').style.display = 'none';
+        }, 3000);
+    } catch(e) {
+        console.log('Mailing list save pending');
+    }
+}
+
+// Hidden Admin Link (click 5 times to reveal)
+let adminClicks = 0;
+const adminLink = document.getElementById('hidden-admin');
+if(adminLink) {
+    adminLink.addEventListener('click', (e) => {
+        adminClicks++;
+        if(adminClicks >= 5) {
+            adminLink.style.color = 'var(--primary)';
+            adminClicks = 0;
+        }
+        e.preventDefault();
+    });
+}
