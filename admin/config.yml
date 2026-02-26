@@ -4,9 +4,6 @@ backend:
   branch: main
   open_authoring: true
 
-# Optional: Add this to prevent caching issues
-publish_mode: editorial_workflow
-
 media_folder: "images"
 public_folder: "/images"
 
@@ -16,8 +13,57 @@ collections:
     folder: "_data"
     create: true
     slug: "{{slug}}"
+    extension: json
+    format: json
     fields:
       - {label: "Product Name", name: "name", widget: "string"}
       - {label: "Price", name: "price", widget: "number"}
       - {label: "Description", name: "description", widget: "text"}
+      - {label: "Ingredients", name: "ingredients", widget: "text"}
       - {label: "Image", name: "image", widget: "image"}
+      - {label: "Show in Slideshow", name: "inSlideshow", widget: "boolean", default: false}
+
+  - name: "slideshow"
+    label: "Slideshow Settings"
+    files:
+      - file: "_data/slideshow.json"
+        label: "Slideshow Products"
+        name: "slideshow_config"
+        fields:
+          - label: "Featured Products"
+            name: "products"
+            widget: "list"
+            fields:
+              - {label: "Product Name", name: "name", widget: "string"}
+              - {label: "Price", name: "price", widget: "number"}
+              - {label: "Description", name: "description", widget: "text"}
+              - {label: "Image", name: "image", widget: "image"}
+
+  - name: "settings"
+    label: "Site Settings"
+    files:
+      - file: "_data/settings.json"
+        label: "Business Settings"
+        name: "business_settings"
+        fields:
+          - {label: "WhatsApp Number", name: "whatsapp", widget: "string"}
+          - {label: "Bank Name", name: "bankName", widget: "string"}
+          - {label: "Account Number", name: "accountNumber", widget: "string"}
+          - {label: "Account Name", name: "accountName", widget: "string"}
+          - {label: "Address", name: "address", widget: "text"}
+          - {label: "Phone", name: "phone", widget: "string"}
+          - {label: "Email", name: "email", widget: "string"}
+          - {label: "Business Hours", name: "hours", widget: "text"}
+          - {label: "Theme", name: "theme", widget: "select", options: ["default", "lavender", "sage", "ocean"]}
+
+  - name: "mailing-list"
+    label: "Mailing List"
+    folder: "_data"
+    create: false
+    slug: "{{slug}}"
+    extension: json
+    format: json
+    fields:
+      - {label: "Name", name: "name", widget: "string"}
+      - {label: "Email", name: "email", widget: "string"}
+      - {label: "Date", name: "date", widget: "datetime"}
