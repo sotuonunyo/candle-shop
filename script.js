@@ -1,3 +1,53 @@
+// GitHub Pages repo path (update this!)
+const repoPath = 'sotuonunyo/candle-shop'; // ← Your repo name with leading slash
+
+// Load all data on page load
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadSettings();
+    await loadProducts();
+    await loadSlideshow();
+    updateCartUI();
+    updateBankDetails();
+    updateContactInfo();
+});
+
+// Load Settings (WhatsApp, Bank Info, Theme)
+async function loadSettings() {
+    try {
+        const res = await fetch(`${repoPath}/_data/settings.json`);
+        settings = await res.json();
+        if(settings.theme) {
+            document.body.className = `theme-${settings.theme}`;
+        }
+    } catch(e) {
+        console.log('Settings not loaded yet');
+        settings = { whatsapp: '1234567890', theme: 'default' };
+    }
+}
+
+// Load Products
+async function loadProducts() {
+    try {
+        const res = await fetch(`${repoPath}/_data/products.json`);
+        products = await res.json();
+        renderProducts();
+    } catch(e) {
+        console.log('No products yet');
+        products = [];
+    }
+}
+
+// Load Slideshow
+async function loadSlideshow() {
+    try {
+        const res = await fetch(`${repoPath}/_data/slideshow.json`);
+        slideshowProducts = await res.json();
+        renderSlideshow();
+    } catch(e) {
+        console.log('No slideshow yet');
+        slideshowProducts = [];
+    }
+}
 let cart = [];
 let products = [];
 let slideshowProducts = [];
@@ -246,3 +296,4 @@ if(adminLink) {
         e.preventDefault();
     });
 }
+
