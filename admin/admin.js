@@ -1,10 +1,10 @@
-// ⚠️ CONFIGURATION - UPDATE THESE VALUES
-const GITHUB_USERNAME = 'sotuonunyo'; // ← CHANGE THIS
-const REPO_NAME = 'candle-shop'; // ← CHANGE THIS if different
+// ⚠️ CONFIGURATION - YOUR GITHUB DETAILS
+const GITHUB_USERNAME = 'sotuonunyo';
+const REPO_NAME = 'candle-shop';
 const BRANCH = 'main';
 
 // GitHub API base URL
-const API_BASE = `https://api.github.com/repos/${sotuonunyo}/${candle-shop}`;
+const API_BASE = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}`;
 
 // Check if admin is logged in
 if(localStorage.getItem('adminLoggedIn') !== 'true') {
@@ -24,10 +24,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadMailingList();
 });
 
-// Load Products from GitHub
+// Load Products from GitHub Pages
 async function loadProducts() {
   try {
-    const response = await fetch(`https://${sotuonunyo}.github.io/${candle-shop}/_data/products.json`);
+    const response = await fetch(`https://${GITHUB_USERNAME}.github.io/${REPO_NAME}/_data/products.json`);
     const products = await response.json();
     renderProductList(products);
   } catch(error) {
@@ -39,7 +39,7 @@ async function loadProducts() {
 function renderProductList(products) {
   const container = document.getElementById('product-list');
   
-  if(products.length === 0) {
+  if(!products || products.length === 0) {
     container.innerHTML = '<p>No products yet. Add your first product above!</p>';
     return;
   }
@@ -71,18 +71,21 @@ async function saveProduct(event) {
   let image = document.getElementById('prod-image').value;
   const inSlideshow = document.getElementById('prod-slideshow').checked;
   
-  // Handle image upload (simple base64 for now)
+  // Handle image upload
   const imageFile = document.getElementById('prod-image-upload').files[0];
   if(imageFile) {
     image = await uploadImageToGitHub(imageFile);
+    if(!image) return; // Upload failed
   }
   
   const newProduct = { name, price, description, ingredients, image, inSlideshow };
   
   try {
     // Load existing products
-    const response = await fetch(`https://${sotuonunyo}.github.io/${candle-shop}/_data/products.json`);
+    const response = await fetch(`https://${GITHUB_USERNAME}.github.io/${REPO_NAME}/_data/products.json`);
     let products = await response.json();
+    
+    if(!Array.isArray(products)) products = [];
     
     if(editIndex !== '') {
       // Update existing product
@@ -109,14 +112,15 @@ async function saveProduct(event) {
     
   } catch(error) {
     console.error('Error saving product:', error);
+    document.getElementById('form-error').textContent = 'Error: ' + error.message;
     document.getElementById('form-error').style.display = 'block';
-    setTimeout(() => document.getElementById('form-error').style.display = 'none', 3000);
+    setTimeout(() => document.getElementById('form-error').style.display = 'none', 5000);
   }
 }
 
 // Edit Product (fill form)
 function editProduct(index) {
-  fetch(`https://${sotuonunyo}.github.io/${candle-shop}/_data/products.json`)
+  fetch(`https://${GITHUB_USERNAME}.github.io/${REPO_NAME}/_data/products.json`)
     .then(res => res.json())
     .then(products => {
       const prod = products[index];
@@ -136,6 +140,10 @@ function editProduct(index) {
       document.getElementById('form-title').textContent = '✏️ Edit Product';
       document.getElementById('save-btn').textContent = '💾 Update Product';
       window.scrollTo(0, 0);
+    })
+    .catch(err => {
+      console.error('Error loading product:', err);
+      alert('Could not load product for editing');
     });
 }
 
@@ -144,14 +152,14 @@ async function deleteProduct(index) {
   if(!confirm('Are you sure you want to delete this product?')) return;
   
   try {
-    const response = await fetch(`https://${sotuonunyo}.github.io/${candle-shop}/_data/products.json`);
+    const response = await fetch(`https://${GITHUB_USERNAME}.github.io/${REPO_NAME}/_data/products.json`);
     let products = await response.json();
     products.splice(index, 1);
     
     await saveToGitHub('_data/products.json', JSON.stringify(products, null, 2), 'Delete product');
     await loadProducts();
   } catch(error) {
-    alert('Error deleting product');
+    alert('Error deleting product: ' + error.message);
   }
 }
 
@@ -177,7 +185,7 @@ function previewImage(event) {
   }
 }
 
-// Upload Image to GitHub (Simple Base64 Method)
+// Upload Image to GitHub (Base64 Method)
 async function uploadImageToGitHub(file) {
   const fileName = `images/${Date.now()}-${file.name.replace(/\s/g, '-')}`;
   
@@ -188,10 +196,10 @@ async function uploadImageToGitHub(file) {
     reader.readAsDataURL(file);
   });
   
-  // Get GitHub token from localStorage (user must set this once)
+  // Get GitHub token from localStorage
   const token = localStorage.getItem('githubToken');
   if(!token) {
-    alert('Please set your GitHub Personal Access Token first in browser console:\nlocalStorage.setItem("githubToken", "your_token_here")');
+    alert('⚠️ GitHub token not set!\n\nPlease open Developer Console (F12) and run:\nlocalStorage.setItem("githubToken", "ghp_your_token_here")\n\nThen try again.');
     return '';
   }
   
@@ -210,14 +218,15 @@ async function uploadImageToGitHub(file) {
     });
     
     if(response.ok) {
-      // Return the public URL
-      return `https://${sotuonunyo}.github.io/${candle-shop}/${fileName}`;
+      // Return the public GitHub Pages URL
+      return `https://${GITHUB_USERNAME}.github.io/${REPO_NAME}/${fileName}`;
     } else {
-      throw new Error('Upload failed');
+      const err = await response.json();
+      throw new Error(err.message || 'Upload failed');
     }
   } catch(error) {
     console.error('Image upload error:', error);
-    alert('Image upload failed. Try again or use an external image URL.');
+    alert('Image upload failed: ' + error.message + '\n\nTip: Make sure your image is under 5MB.');
     return '';
   }
 }
@@ -225,7 +234,7 @@ async function uploadImageToGitHub(file) {
 // Load Settings
 async function loadSettings() {
   try {
-    const response = await fetch(`https://${sotuonunyo}.github.io/${candle-shop}/_data/settings.json`);
+    const response = await fetch(`https://${GITHUB_USERNAME}.github.io/${REPO_NAME}/_data/settings.json`);
     const settings = await response.json();
     
     document.getElementById('set-whatsapp').value = settings.whatsapp || '';
@@ -238,7 +247,7 @@ async function loadSettings() {
     document.getElementById('set-hours').value = settings.hours || '';
     document.getElementById('set-theme').value = settings.theme || 'default';
   } catch(error) {
-    console.log('No settings file yet');
+    console.log('No settings file yet - will create on first save');
   }
 }
 
@@ -263,18 +272,18 @@ async function saveSettings(event) {
     document.getElementById('settings-success').style.display = 'block';
     setTimeout(() => document.getElementById('settings-success').style.display = 'none', 3000);
   } catch(error) {
-    alert('Error saving settings');
+    alert('Error saving settings: ' + error.message);
   }
 }
 
 // Load Mailing List
 async function loadMailingList() {
   try {
-    const response = await fetch(`https://${sotuonunyo}.github.io/${candle-shop}/_data/mailing-list.json`);
+    const response = await fetch(`https://${GITHUB_USERNAME}.github.io/${REPO_NAME}/_data/mailing-list.json`);
     const list = await response.json();
     
     const container = document.getElementById('mailing-list');
-    if(list.length === 0) {
+    if(!list || list.length === 0) {
       container.innerHTML = '<p>No subscribers yet.</p>';
       return;
     }
@@ -294,7 +303,7 @@ async function loadMailingList() {
 async function saveToGitHub(filePath, content, message) {
   const token = localStorage.getItem('githubToken');
   if(!token) {
-    throw new Error('GitHub token not set');
+    throw new Error('GitHub token not set. Open Console and run: localStorage.setItem("githubToken", "ghp_your_token")');
   }
   
   // First, get the current file SHA (if it exists)
@@ -308,10 +317,10 @@ async function saveToGitHub(filePath, content, message) {
       sha = data.sha;
     }
   } catch(e) {
-    // File doesn't exist yet, that's ok
+    // File doesn't exist yet, that's ok - we'll create it
   }
   
-  // Save the file
+  // Prepare the request body
   const body = {
     message: message,
     content: btoa(unescape(encodeURIComponent(content))),
@@ -319,6 +328,7 @@ async function saveToGitHub(filePath, content, message) {
   };
   if(sha) body.sha = sha;
   
+  // Save the file
   const response = await fetch(`${API_BASE}/contents/${filePath}`, {
     method: 'PUT',
     headers: {
@@ -335,6 +345,3 @@ async function saveToGitHub(filePath, content, message) {
   
   return true;
 }
-
-// Helper: Set GitHub Token (run once in browser console)
-// localStorage.setItem('githubToken', 'ghp_your_personal_access_token_here')
